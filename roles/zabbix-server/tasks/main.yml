@@ -36,6 +36,7 @@
     state: present
 
 - name: Import initial schema
+  become: yes
   ansible.builtin.shell: |
     gzip -dc /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | \
     PGPASSWORD={{ zabbix_db_password }} psql -U {{ zabbix_db_user }} -h {{ zabbix_db_host }} {{ zabbix_db_name }}
