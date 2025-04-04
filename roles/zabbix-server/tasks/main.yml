@@ -50,6 +50,7 @@
     state: present
 
 - name: Verify SQL schema file exists
+  become: yes
   ansible.builtin.stat:
     path: /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
   register: schema_sql_file
