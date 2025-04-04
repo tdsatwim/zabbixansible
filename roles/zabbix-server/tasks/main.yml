@@ -1,0 +1,48 @@
+- name: Install PostgreSQL server and client
+  ansible.builtin.yum:
+    name:
+      - postgresql-server
+      - postgresql
+    state: present
+
+- name: Initialize PostgreSQL database
+  ansible.builtin.command: postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/PG_VERSION
+
+- name: Start and enable PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Create Zabbix DB and user
+  ansible.builtin.shell: |
+    psql -c "CREATE USER {{ zabbix_db_user }} WITH PASSWORD '{{ zabbix_db_password }}';"
+    psql -c "CREATE DATABASE {{ zabbix_db_name }} OWNER {{ zabbix_db_user }};"
+  become_user: postgres
+
+- name: Install Zabbix server (PostgreSQL)
+  ansible.builtin.yum:
+    name:
+      - zabbix-server-pgsql
+      - zabbix-sql-scripts
+    state: present
+
+- name: Import initial schema
+  ansible.builtin.command:
+    cmd: zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -U {{ zabbix_db_user }} {{ zabbix_db_name }}
+  become_user: postgres
+
+- name: Enable and start Zabbix server
+  ansible.builtin.service:
+    name: zabbix-server
+    state: started
+    enabled: yes
+
+- name: Open Zabbix server port
+  ansible.builtin.firewalld:
+    port: 10051/tcp
+    permanent: true
+    state: enabled
+    immediate: yes

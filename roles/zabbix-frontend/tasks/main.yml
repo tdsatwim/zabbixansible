@@ -1,0 +1,39 @@
+- name: Install Nginx, PHP, and Zabbix frontend
+  ansible.builtin.yum:
+    name:
+      - nginx
+      - php-fpm
+      - php-pgsql
+      - zabbix-web-pgsql
+      - zabbix-nginx-conf
+    state: present
+
+- name: Configure PHP timezone
+  ansible.builtin.lineinfile:
+    path: /etc/php-fpm.d/zabbix.conf
+    regexp: '^php_value\[date.timezone\]'
+    line: 'php_value[date.timezone] = Europe/Zurich'
+
+- name: Configure Zabbix frontend DB
+  ansible.builtin.template:
+    src: zabbix.conf.php.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+
+- name: Enable and start php-fpm
+  ansible.builtin.service:
+    name: php-fpm
+    state: started
+    enabled: yes
+
+- name: Enable and start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Open HTTP port
+  ansible.builtin.firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+    immediate: yes

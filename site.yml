@@ -1,0 +1,23 @@
+- name: Apply common configuration to all nodes
+  hosts: all
+  become: yes
+  roles:
+    - common
+
+- name: Set up Zabbix server
+  hosts: Zabbix_Server
+  become: yes
+  roles:
+    - zabbix-server
+
+- name: Set up Zabbix frontend
+  hosts: Zabbix_Frontend
+  become: yes
+  roles:
+    - zabbix-frontend
+
+- name: Set up Zabbix agent
+  hosts: Zabbix_Agent
+  become: yes
+  roles:
+    - zabbix-agent

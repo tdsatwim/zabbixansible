@@ -1,0 +1,10 @@
+- name: Clean and update yum cache
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+
+- name: Ensure firewalld is installed and enabled
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: yes
