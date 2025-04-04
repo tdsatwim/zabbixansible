@@ -55,11 +55,6 @@
     path: /usr/share/zabbix/sql-scripts/postgresql/server.sql.gz
     mode: '0644'
 
-- name: Fail if SQL schema file is missing
-  ansible.builtin.fail:
-    msg: "The Zabbix SQL schema file was not found or not readable."
-  when: not schema_sql_file.stat.exists
-
 - name: Import initial schema as postgres user
   become: yes
   become_user: postgres
