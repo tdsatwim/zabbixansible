@@ -38,8 +38,7 @@
 - name: Import initial schema
   ansible.builtin.shell: |
     gzip -dc /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | \
-    PGPASSWORD={{ zabbix_db_password }} psql -U {{ zabbix_db_user }} {{ zabbix_db_name }}
-  become_user: postgres
+    PGPASSWORD={{ zabbix_db_password }} psql -U {{ zabbix_db_user }} -h {{ zabbix_db_host }} {{ zabbix_db_name }}
 
 - name: Enable and start Zabbix server
   ansible.builtin.service:
