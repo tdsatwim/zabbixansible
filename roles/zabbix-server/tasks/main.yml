@@ -49,11 +49,11 @@
       - zabbix-sql-scripts
     state: present
 
-- name: Verify SQL schema file exists
+- name: Ensure SQL schema file is world-readable
   become: yes
-  ansible.builtin.stat:
-    path: /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
-  register: schema_sql_file
+  ansible.builtin.file:
+    path: /usr/share/zabbix/sql-scripts/postgresql/server.sql.gz
+    mode: '0644'
 
 - name: Fail if SQL schema file is missing
   ansible.builtin.fail:
