@@ -5,19 +5,19 @@
     - common
 
 - name: Set up Zabbix server
-  hosts: Zabbix_Server
+  hosts: zabbix_server
   become: yes
   roles:
     - zabbix-server
 
 - name: Set up Zabbix frontend
-  hosts: Zabbix_Frontend
+  hosts: zabbix_frontend
   become: yes
   roles:
     - zabbix-frontend
 
 - name: Set up Zabbix agent
-  hosts: Zabbix_Agent
+  hosts: zabbix_agent
   become: yes
   roles:
     - zabbix-agent
