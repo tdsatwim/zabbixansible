@@ -16,6 +16,19 @@
     state: started
     enabled: yes
 
+- name: Change PostgreSQL local auth from peer to md5
+  ansible.builtin.replace:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    regexp: '^local\s+all\s+all\s+peer'
+    replace: 'local   all             all                                     md5'
+  notify: Reload PostgreSQL
+
+- name: Ensure IPv4 connections use md5
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    line: 'host    all             all             127.0.0.1/32            md5'
+    insertafter: '^# IPv4 local connections:'
+
 - name: Create Zabbix DB user if not exists
   ansible.builtin.shell: |
     psql -tc "SELECT 1 FROM pg_roles WHERE rolname='{{ zabbix_db_user }}'" | grep -q 1 || \
