@@ -64,9 +64,8 @@
   become: yes
   become_user: postgres
   ansible.builtin.shell: |
-    gzip -dc /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | \
+    gzip -dc /usr/share/zabbix/sql-scripts/postgresql/server.sql.gz | \
     psql {{ zabbix_db_name }}
-  when: schema_sql_file.stat.exists
 
 - name: Enable and start Zabbix server
   ansible.builtin.service:
