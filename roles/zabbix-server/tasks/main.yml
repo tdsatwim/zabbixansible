@@ -1,3 +1,4 @@
+---
 - name: Install PostgreSQL server and client
   ansible.builtin.yum:
     name:
@@ -48,11 +49,23 @@
       - zabbix-sql-scripts
     state: present
 
-- name: Import initial schema
+- name: Verify SQL schema file exists
+  ansible.builtin.stat:
+    path: /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
+  register: schema_sql_file
+
+- name: Fail if SQL schema file is missing
+  ansible.builtin.fail:
+    msg: "The Zabbix SQL schema file was not found or not readable."
+  when: not schema_sql_file.stat.exists
+
+- name: Import initial schema as postgres user
   become: yes
+  become_user: postgres
   ansible.builtin.shell: |
     gzip -dc /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | \
-    PGPASSWORD={{ zabbix_db_password }} psql -U {{ zabbix_db_user }} -h 127.0.0.1 {{ zabbix_db_name }}
+    psql {{ zabbix_db_name }}
+  when: schema_sql_file.stat.exists
 
 - name: Enable and start Zabbix server
   ansible.builtin.service:
