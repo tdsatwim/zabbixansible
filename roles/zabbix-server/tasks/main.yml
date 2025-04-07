@@ -31,6 +31,12 @@
     line: 'host    all             all             127.0.0.1/32            md5'
     insertafter: '^# IPv4 local connections:'
 
+- name: Wait for PostgreSQL to accept connections
+  become: yes
+  become_user: postgres
+  ansible.builtin.shell: |
+    until pg_isready -q; do sleep 1; done
+    
 - name: Create Zabbix DB user (force re-creation if needed)
   become: yes
   become_user: postgres
