@@ -37,15 +37,22 @@
   ansible.builtin.shell: |
     until pg_isready -q; do sleep 1; done
     
-- name: Create Zabbix DB user (force re-creation if needed)
+- name: Check if Zabbix user exists
   become: yes
   become_user: postgres
-  ansible.builtin.shell: |
-    psql -c "DO \$\$ BEGIN
-      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '{{ zabbix_db_user }}') THEN
-        CREATE ROLE {{ zabbix_db_user }} WITH LOGIN PASSWORD '{{ zabbix_db_password }}';
-      END IF;
-    END \$\$;"
+  register: zabbix_user_check
+  ansible.builtin.command: psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{ zabbix_db_user }}'"
+
+- name: Debug zabbix_user_check result
+  debug:
+    var: zabbix_user_check.stdout
+
+- name: Create Zabbix user (if needed)
+  become: yes
+  become_user: postgres
+  ansible.builtin.command: >
+    psql -c "CREATE ROLE {{ zabbix_db_user }} WITH LOGIN PASSWORD '{{ zabbix_db_password }}';"
+  when: zabbix_user_check.stdout != '1'
 
 - name: Create Zabbix database if not exists
   ansible.builtin.shell: |
