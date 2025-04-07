@@ -1,4 +1,4 @@
-- name: Install Nginx, PHP, and Zabbix frontend
+- name: Install Nginx, PHP, and Zabbix frontend 
   ansible.builtin.yum:
     name:
       - nginx
@@ -7,6 +7,7 @@
       - zabbix-web-pgsql
       - zabbix-nginx-conf
     state: present
+    module_hotfixes: true
 
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
@@ -18,6 +19,9 @@
   ansible.builtin.template:
     src: zabbix.conf.php.j2
     dest: /etc/zabbix/web/zabbix.conf.php
+    mode: '0640'
+    owner: root
+    group: apache
 
 - name: Enable and start php-fpm
   ansible.builtin.service:
@@ -34,6 +38,10 @@
 - name: Open HTTP port
   ansible.builtin.firewalld:
     port: 80/tcp
+    permanent: true
+    state: enabled
+    immediate: yes
+
     permanent: true
     state: enabled
     immediate: yes
