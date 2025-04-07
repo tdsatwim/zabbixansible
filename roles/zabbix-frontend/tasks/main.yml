@@ -7,8 +7,8 @@
       - zabbix-web-pgsql
       - zabbix-nginx-conf
     state: present
-    enablerepo: zabbix
-
+    enablerepo: Zabbix 7.2 RHEL9
+    
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
     path: /etc/php-fpm.d/zabbix.conf
