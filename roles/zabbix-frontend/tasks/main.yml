@@ -39,7 +39,3 @@
     permanent: true
     state: enabled
     immediate: yes
-
-    permanent: true
-    state: enabled
-    immediate: yes
