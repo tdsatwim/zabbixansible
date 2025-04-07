@@ -1,13 +1,11 @@
-- name: Install Nginx, PHP, and Zabbix frontend 
+- name: Install Zabbix frontend from Zabbix repo only
   ansible.builtin.yum:
     name:
-      - nginx
-      - php-fpm
-      - php-pgsql
       - zabbix-web-pgsql
       - zabbix-nginx-conf
     state: present
-    enablerepo: Zabbix 7.2 RHEL9
+    enablerepo: Zabbix_7_2_RHEL9
+    disablerepo: SMDS_EPEL_EPEL9
     
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
