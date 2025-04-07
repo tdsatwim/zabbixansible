@@ -7,7 +7,7 @@
       - zabbix-web-pgsql
       - zabbix-nginx-conf
     state: present
-    module_hotfixes: true
+    enablerepo: zabbix
 
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
