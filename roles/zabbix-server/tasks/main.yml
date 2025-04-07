@@ -17,11 +17,12 @@
     state: started
     enabled: yes
 
-- name: Change PostgreSQL local auth from peer to md5
+- name: Set PostgreSQL local auth to trust
+  become: yes
   ansible.builtin.replace:
     path: /var/lib/pgsql/data/pg_hba.conf
-    regexp: '^local\s+all\s+all\s+peer'
-    replace: 'local   all             all                                     md5'
+    regexp: '^local\s+all\s+all\s+.*$'
+    replace: 'local   all             all                                     trust'
   notify: Reload PostgreSQL
 
 - name: Ensure IPv4 connections use md5
