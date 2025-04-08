@@ -24,18 +24,13 @@
     owner: root
     group: apache
 
-- name: Set nginx to listen on port 80 instead of 8080
-  ansible.builtin.replace:
+- name: Set nginx listen + server_name block correctly
+  ansible.builtin.blockinfile:
     path: /etc/nginx/conf.d/zabbix.conf
-    regexp: '^\\s*#?\\s*listen\\s+8080;'
-    replace: '    listen          80;'
-  notify: restart nginx
-
-- name: Set nginx server_name to localhost
-  ansible.builtin.lineinfile:
-    path: /etc/nginx/conf.d/zabbix.conf
-    regexp: '^\\s*#?\\s*server_name.*'
-    line: '    server_name     localhost;'
+    marker: "# {mark} ZABBIX FRONTEND BLOCK"
+    block: |
+      listen          80;
+      server_name     localhost;
   notify: restart nginx
 
 - name: Enable and start php-fpm
