@@ -3,3 +3,7 @@
     name: nginx
     state: restarted
 
+- name: restart php-fpm
+  ansible.builtin.service:
+    name: php-fpm
+    state: restarted
