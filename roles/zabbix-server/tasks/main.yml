@@ -87,3 +87,11 @@
     permanent: true
     state: enabled
     immediate: yes
+    
+- name: Open PostgreSQL port for remote access
+  ansible.posix.firewalld:
+    port: 5432/tcp
+    permanent: true
+    state: enabled
+    immediate: yes
+
