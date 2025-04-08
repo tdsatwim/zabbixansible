@@ -3,10 +3,17 @@
     name:
       - zabbix-web-pgsql
       - zabbix-nginx-conf
+      - nginx
     state: present
     enablerepo: Zabbix_7_2_RHEL9
     disablerepo: SMDS_EPEL_EPEL9
-    
+
+- name: Ensure nginx configuration is valid
+  become: yes
+  ansible.builtin.command: nginx -t
+  register: nginx_check
+  changed_when: false
+
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
     path: /etc/php-fpm.d/zabbix.conf
@@ -26,11 +33,6 @@
     name: php-fpm
     state: started
     enabled: yes
-
-- name: Ensure nginx is installed before enabling
-  ansible.builtin.package:
-    name: nginx
-    state: present
 
 - name: Enable and start nginx
   ansible.builtin.service:
