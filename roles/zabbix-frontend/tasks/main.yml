@@ -34,11 +34,15 @@
     state: started
     enabled: yes
 
-- name: Enable and start nginx
+- name: Ensure nginx is enabled
   ansible.builtin.service:
     name: nginx
-    state: started
     enabled: yes
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
 
 - name: Open HTTP port
   ansible.builtin.firewalld:
