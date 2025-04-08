@@ -8,11 +8,10 @@
     enablerepo: Zabbix_7_2_RHEL9
     disablerepo: SMDS_EPEL_EPEL9
 
-- name: Ensure nginx configuration is valid
-  become: yes
+- name: Ensure Nginx config is valid
   ansible.builtin.command: nginx -t
-  register: nginx_check
   changed_when: false
+  become: true
 
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
@@ -20,7 +19,7 @@
     regexp: '^php_value\[date.timezone\]'
     line: 'php_value[date.timezone] = Europe/Zurich'
 
-- name: Configure Zabbix frontend DB
+- name: Deploy Zabbix frontend DB config
   ansible.builtin.template:
     src: zabbix.conf.php.j2
     dest: /etc/zabbix/web/zabbix.conf.php
@@ -31,20 +30,25 @@
 - name: Enable and start php-fpm
   ansible.builtin.service:
     name: php-fpm
-    state: started
-    enabled: yes
+    enabled: true
+    state: restarted
 
-- name: Ensure nginx is started and enabled
+- name: Enable and start nginx
   ansible.builtin.service:
     name: nginx
+    enabled: true
     state: restarted
-    enabled: yes
 
-- name: Open HTTP port in firewalld
+- name: Allow HTTP traffic through firewall
   ansible.builtin.firewalld:
     port: 80/tcp
     permanent: true
     state: enabled
-    immediate: yes
-    zone: public
-    
+    immediate: true
+
+- name: Add HTTP service to firewalld if not already
+  ansible.builtin.firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
