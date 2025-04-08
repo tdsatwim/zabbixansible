@@ -1,4 +1,4 @@
-- name: Reload PostgreSQL
+- name: reload postgresql
   ansible.builtin.service:
     name: postgresql
     state: reloaded
