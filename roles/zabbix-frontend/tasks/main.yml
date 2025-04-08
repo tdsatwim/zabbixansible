@@ -10,12 +10,6 @@
     enablerepo: Zabbix_7_2_RHEL9
     disablerepo: SMDS_EPEL_EPEL9
 
-- name: Configure PHP timezone
-  ansible.builtin.lineinfile:
-    path: /etc/php-fpm.d/zabbix.conf
-    regexp: '^php_value\[date.timezone\]'
-    line: 'php_value[date.timezone] = Europe/Zurich'
-
 - name: Deploy Zabbix frontend DB config
   ansible.builtin.template:
     src: zabbix.conf.php.j2
@@ -24,14 +18,23 @@
     owner: root
     group: apache
 
-- name: Set nginx listen + server_name block correctly
-  ansible.builtin.blockinfile:
-    path: /etc/nginx/conf.d/zabbix.conf
-    marker: "# {mark} ZABBIX FRONTEND BLOCK"
-    block: |
-      listen          80;
-      server_name     localhost;
+- name: Deploy fixed nginx Zabbix frontend config
+  ansible.builtin.template:
+    src: zabbix.conf.j2
+    dest: /etc/nginx/conf.d/zabbix.conf
+    mode: '0644'
+    owner: root
+    group: root
   notify: restart nginx
+
+- name: Deploy Zabbix PHP-FPM config with timezone
+  ansible.builtin.template:
+    src: zabbix-php-fpm.conf.j2
+    dest: /etc/php-fpm.d/zabbix.conf
+    mode: '0644'
+    owner: root
+    group: root
+  notify: restart php-fpm
 
 - name: Enable and start php-fpm
   ansible.builtin.service:
@@ -44,7 +47,7 @@
     name: nginx
     enabled: true
 
-- name: Open HTTP port in firewalld
+- name: Open HTTP port in firewalld (zone: public)
   ansible.posix.firewalld:
     port: 80/tcp
     zone: public
@@ -52,7 +55,7 @@
     state: enabled
     immediate: true
 
-- name: Ensure HTTP service is also enabled
+- name: Ensure HTTP service is also enabled (zone: public)
   ansible.posix.firewalld:
     service: http
     zone: public
