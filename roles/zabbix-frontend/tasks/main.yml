@@ -27,6 +27,11 @@
     state: started
     enabled: yes
 
+- name: Ensure nginx is installed before enabling
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
 - name: Enable and start nginx
   ansible.builtin.service:
     name: nginx
