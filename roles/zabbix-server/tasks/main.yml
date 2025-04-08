@@ -10,26 +10,21 @@
   ansible.builtin.command: postgresql-setup --initdb
   args:
     creates: /var/lib/pgsql/data/PG_VERSION
+    
+- name: Deploy pg_hba.conf with access to Zabbix frontend
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    mode: '0600'
+    owner: postgres
+    group: postgres
+  notify: Reload PostgreSQL
 
 - name: Start and enable PostgreSQL
   ansible.builtin.service:
     name: postgresql
     state: started
     enabled: yes
-
-- name: Set PostgreSQL local auth to trust
-  become: yes
-  ansible.builtin.replace:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    regexp: '^local\s+all\s+all\s+.*$'
-    replace: 'local   all             all                                     trust'
-  notify: Reload PostgreSQL
-
-- name: Ensure IPv4 connections use md5
-  ansible.builtin.lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    line: 'host    all             all             127.0.0.1/32            md5'
-    insertafter: '^# IPv4 local connections:'
 
 - name: Wait for PostgreSQL to accept connections
   become: yes
