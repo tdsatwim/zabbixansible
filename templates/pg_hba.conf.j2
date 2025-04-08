@@ -1,0 +1,21 @@
+# PostgreSQL Client Authentication Configuration File
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# Local connections
+local   all             all                                     trust
+
+# Allow IPv4 localhost
+host    all             all             127.0.0.1/32            md5
+
+# Allow IPv6 localhost
+host    all             all             ::1/128                 md5
+
+# Allow connections from Zabbix frontend server
+host    all             all             {{ zabbix_frontend_ip }}/32    md5
+
+# Replication (optional)
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            md5
+host    replication     all             ::1/128                 md5
+
