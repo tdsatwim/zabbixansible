@@ -1,17 +1,14 @@
-- name: Install Zabbix frontend from Zabbix repo only
+- name: Install Zabbix frontend and dependencies
   ansible.builtin.yum:
     name:
       - zabbix-web-pgsql
       - zabbix-nginx-conf
       - nginx
+      - php-fpm
+      - php-pgsql
     state: present
     enablerepo: Zabbix_7_2_RHEL9
     disablerepo: SMDS_EPEL_EPEL9
-
-- name: Ensure Nginx config is valid
-  ansible.builtin.command: nginx -t
-  changed_when: false
-  become: true
 
 - name: Configure PHP timezone
   ansible.builtin.lineinfile:
@@ -27,28 +24,58 @@
     owner: root
     group: apache
 
+- name: Enable nginx to start on boot (systemd-specific)
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: yes
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
 - name: Enable and start php-fpm
   ansible.builtin.service:
     name: php-fpm
-    enabled: true
-    state: restarted
+    state: started
+    enabled: yes
 
-- name: Enable and start nginx
-  ansible.builtin.service:
-    name: nginx
-    enabled: true
-    state: restarted
-
-- name: Allow HTTP traffic through firewall
-  ansible.builtin.firewalld:
+- name: Open HTTP port 80 (zone public)
+  ansible.posix.firewalld:
     port: 80/tcp
+    zone: public
     permanent: true
     state: enabled
     immediate: true
 
-- name: Add HTTP service to firewalld if not already
-  ansible.builtin.firewalld:
+- name: Ensure HTTP service is enabled (zone public)
+  ansible.posix.firewalld:
     service: http
+    zone: public
     permanent: true
     state: enabled
     immediate: true
+
+- name: Debug nginx enable status
+  ansible.builtin.command: systemctl is-enabled nginx
+  register: nginx_enabled
+
+- name: Show nginx enabled output
+  debug:
+    var: nginx_enabled.stdout
+
+- name: Debug firewall active zone
+  ansible.builtin.command: firewall-cmd --get-active-zones
+  register: fw_zones
+
+- name: Show firewall zone status
+  debug:
+    var: fw_zones.stdout
+
+- name: Debug firewall config in public zone
+  ansible.builtin.command: firewall-cmd --zone=public --list-all
+  register: fw_status
+
+- name: Show firewall rules (public zone)
+  debug:
+    var: fw_status.stdout
